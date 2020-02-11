@@ -26,7 +26,12 @@ find_reaper_jar() {
         -regex '.*/cassandra-reaper-.*[0-9rT]\.jar' || true
 }
 
-REAPER_JAR=$(find_reaper_jar ".")
+# Do not search from '/' as it prints many permission errors (even for
+# root user), notably for '/proc', '/run', etc.
+# Also it can potentially take a huge amount of time.
+if [ "$(pwd -P)" != "/" ]; then
+    REAPER_JAR=$(find_reaper_jar ".")
+fi
 
 if [ $REAPER_JAR ]; then
     echo "Using reaper in target"
