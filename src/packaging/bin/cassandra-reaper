@@ -54,6 +54,14 @@ else
     CONFIG_PATH="$@"
 fi
 
+SSL_CONFIG_PATH="/etc/cassandra-reaper/cassandra-reaper-ssl.properties"
+if [ -r "$SSL_CONFIG_PATH" ]; then
+    echo "Loading SSL configuration from $SSL_CONFIG_PATH"
+    # The `sed` expression below removes empty lines and comments
+    # (i.e. lines starting with '#' character).
+    mapfile -t JVM_OPTS <<< "$(cat "$SSL_CONFIG_PATH" | sed '/^\(#.*\)*$/d')"
+fi
+
 # Use JAVA_HOME if set, otherwise look for java in PATH
 if [ -n "$JAVA_HOME" ]; then
     # Why we can't have nice things: Solaris combines x86 and x86_64
@@ -82,6 +90,7 @@ JVM_OPTS=(
     -ea
     -Xms2G
     -Xmx2G
+    ${JVM_OPTS[@]}
     # Prefer binding to IPv4 network intefaces (when net.ipv6.bindv6only=1). See
     # http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6342561 (short version:
     # comment out this entry to enable IPv6 support).
